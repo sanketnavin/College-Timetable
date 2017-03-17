@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "827517824421",
+    "firebase_url": "https://collegetimetable-d9397.firebaseio.com",
+    "project_id": "collegetimetable-d9397",
+    "storage_bucket": "collegetimetable-d9397.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:827517824421:android:d720f8bb70f9a23a",
+        "android_client_info": {
+          "package_name": "com.spit.timetable.timetablespit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "827517824421-9asknb32l64b3m4r7q0ccr8vma8hkmbl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.spit.timetable.timetablespit",
+            "certificate_hash": "7a63d01456bda576ec82a9d0c527371396721740"
+          }
+        },
+        {
+          "client_id": "827517824421-ec92r83bll6bt9543qd5u4ala9f41q0t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsuzrTrD3CxVLsFM-LZzw2w7fVHv5l79M"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "827517824421-ec92r83bll6bt9543qd5u4ala9f41q0t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

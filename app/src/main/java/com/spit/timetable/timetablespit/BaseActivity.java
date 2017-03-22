@@ -19,6 +19,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,7 +63,7 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
                 if(lecture.getSubject().getmClass().getCode().equals(currTimetable)) {
                     lectures.add(lecture);
                     Log.d(currTimetable, lecture.getFaculty().getCode());
-                    mWeekView.invalidate();
+                    mWeekView.notifyDatasetChanged();
                 }
             }
 
@@ -72,7 +74,6 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
         };
 
         databaseReference.addChildEventListener(childEventListener);
-
 
         // Get a reference for the week view in the layout.
         mWeekView = (WeekView) findViewById(R.id.weekView);
@@ -164,8 +165,8 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
                 // All android api level do not have a standard way of getting the first letter of
                 // the week day name. Hence we get the first char programmatically.
                 // Details: http://stackoverflow.com/questions/16959502/get-one-letter-abbreviation-of-week-day-of-a-date-in-java#answer-16959657
-                if (shortDate)
-                    weekday = String.valueOf(weekday.charAt(0));
+//                if (shortDate)
+//                    weekday = String.valueOf(weekday.charAt(0));
                 return weekday.toUpperCase();
             }
 
@@ -186,7 +187,7 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
     }
 
     protected String getLectureTitle(Lecture lecture) {
-        return String.format("%s %s %s", lecture.getSubject().getCode(), lecture.getFaculty().getCode(), lecture.getSubject().getmClass().getRoom());
+        return String.format("%s\n%s\n%s", lecture.getSubject().getCode(), lecture.getFaculty().getCode(), lecture.getSubject().getmClass().getRoom());
     }
 
     @Override
@@ -195,7 +196,47 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
     }
 
     @Override
-    public void onEventLongPress(WeekViewEvent event, RectF eventRect) {
+    public void onEventLongPress(final WeekViewEvent event, RectF eventRect) {
+        int i;
+        for(i=0;i<lectures.size();i++){
+            Log.d("Lecture title", lectures.get(i).findLec());
+            if(lectures.get(i).findLec().equals
+                (   event.getName() +
+                    Integer.toString(event.getStartTime().get(Calendar.HOUR_OF_DAY)) +
+                    Integer.toString(event.getStartTime().get(Calendar.DAY_OF_WEEK))
+                )) {
+                break;
+            }
+
+        }
+        Log.d("testing delete", Integer.toString(i));
+        final Lecture selectedLec = lectures.get(i);
+        Log.d("Selected Lec", selectedLec.toString());
+
+        //Query DelQuery = databaseReference.orderByChild("dayName").equalTo(selectedLec.getDayName());
+
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot lecSnapshot: dataSnapshot.getChildren()) {
+                    Lecture lecture = lecSnapshot.getValue(Lecture.class);
+                    Log.d("Lecture fetched", lecture.getFaculty().getCode() + lecture.getSubject().getCode());
+                    if(lecture.toString().equals(selectedLec.toString())){
+                        Log.d("Value removed", lecture.toString());
+                        lecSnapshot.getRef().removeValue();
+                        lectures.remove(selectedLec);
+                    }
+                }
+                mWeekView.notifyDatasetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("Cancelled deletion", "onCancelled", databaseError.toException());
+            }
+        });
+
+
         Toast.makeText(this, "Long pressed event: " + event.getName(), Toast.LENGTH_SHORT).show();
     }
 
@@ -213,37 +254,35 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
     public List<? extends WeekViewEvent> onMonthChange(int newYear, int newMonth) {
         // Populate the week view with some events.
         List<WeekViewEvent> events = new ArrayList<WeekViewEvent>();
+        Log.d(currTimetable, "Inside Month Change");
 
         /*
         * Get start and end day of the current month
         * */
-//        for(int i=0;i<lectures.size();i++) {
-
-            Log.d(currTimetable, "Inside Month Change");
-            //Lecture l = lectures.get(i);
-            Calendar startTime = Calendar.getInstance();
-            Calendar monthStart = (Calendar) startTime.clone();
+        for(int i=0;i<lectures.size();i++) {
+            Lecture l = lectures.get(i);
+            Calendar monthStart = Calendar.getInstance();
+            monthStart.set(Calendar.MONTH, newMonth - 1);
+            monthStart.set(Calendar.YEAR, newYear);
             monthStart.set(Calendar.DAY_OF_MONTH, 1);
-            Calendar monthEnd = (Calendar) startTime.clone();
+            Calendar monthEnd = (Calendar) monthStart.clone();
             monthEnd.set(Calendar.DAY_OF_MONTH, monthStart.getActualMaximum(Calendar.DAY_OF_MONTH));
 
             //set start day to the first required weekday of the month
-            while(monthStart.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY )
+            while((int) monthStart.get(Calendar.DAY_OF_WEEK) != l.getDay() )
                 monthStart.add(Calendar.DAY_OF_MONTH, 1);
 
             //populate the event to all the required weekdays of the month
             while(true) {
-                startTime = (Calendar) monthStart.clone();
-                startTime.set(Calendar.HOUR_OF_DAY, 10);
+                Calendar startTime = (Calendar) monthStart.clone();
+                startTime.set(Calendar.HOUR_OF_DAY, l.getStartTime());
                 startTime.set(Calendar.MINUTE, 0);
-                startTime.set(Calendar.MONTH, newMonth - 1);
-                startTime.set(Calendar.YEAR, newYear);
                 Calendar endTime = (Calendar) startTime.clone();
-//                if(l.isDoubleLecture())
-//                   endTime.add(Calendar.HOUR_OF_DAY, 2);
-//                else
-                endTime.add(Calendar.HOUR_OF_DAY, 1);
-                WeekViewEvent event = new WeekViewEvent(1, getEventTitle(startTime), startTime, endTime);
+                if(l.isDoubleLecture())
+                    endTime.add(Calendar.HOUR_OF_DAY, 2);
+                else
+                    endTime.add(Calendar.HOUR_OF_DAY, 1);
+                WeekViewEvent event = new WeekViewEvent(1, getLectureTitle(l), startTime, endTime);
                 event.setColor(getResources().getColor(R.color.event_color_01));
                 events.add(event);
                 Log.d(currTimetable, "Event added");
@@ -252,7 +291,7 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
                 }
                 monthStart.add(Calendar.DAY_OF_MONTH, 7);
             }
-//        }
+        }
         return events;
     }
 

@@ -32,6 +32,14 @@ public class Lecture {
         this.doubleLecture = doubleLecture;
     }
 
+    public String getTitle() {
+        return String.format("%s\n%s\n%s", this.getSubject().getCode(), this.getFaculty().getCode(), this.getSubject().getmClass().getRoom());
+    }
+
+    public String findLec() {
+        return this.getTitle() + Integer.toString(this.startTime) + Integer.toString(this.getDay());
+    }
+
     public Subject getSubject() {
         return subject;
     }
@@ -78,5 +86,15 @@ public class Lecture {
 
     public void setDoubleLecture(boolean doubleLecture) {
         this.doubleLecture = doubleLecture;
+    }
+
+    @Override
+    public String toString() {
+        return "Lecture{" +
+                "subject=" + subject.getCode() +
+                ", faculty=" + faculty.getCode() +
+                ", dayName='" + dayName + '\'' +
+                ", startTime=" + startTime +
+                '}';
     }
 }

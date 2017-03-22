@@ -1,5 +1,6 @@
 package com.spit.timetable.timetablespit;
 
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -190,11 +191,45 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
         return String.format("%s\n%s\n%s", lecture.getSubject().getCode(), lecture.getFaculty().getCode(), lecture.getSubject().getmClass().getRoom());
     }
 
+    /*
+    * Display the details of the lecture when the timeslot is clicked
+    * */
     @Override
     public void onEventClick(WeekViewEvent event, RectF eventRect) {
-        Toast.makeText(this, "Clicked " + event.getName(), Toast.LENGTH_SHORT).show();
+
+        int i;
+        for(i=0;i<lectures.size();i++) {
+            Log.d("Lecture title", lectures.get(i).findLec());
+            if (lectures.get(i).findLec().equals
+                    (event.getName() +
+                            Integer.toString(event.getStartTime().get(Calendar.HOUR_OF_DAY)) +
+                            Integer.toString(event.getStartTime().get(Calendar.DAY_OF_WEEK))
+                    )) {
+                break;
+            }
+        }
+
+        Lecture selectedLec = lectures.get(i);
+
+        DialogFragment newFragment = new DetailsDialogFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("className", currTimetable);
+        bundle.putString("roomNo", selectedLec.getSubject().getmClass().getRoom());
+        Log.d("Room title", selectedLec.getSubject().getmClass().getRoom());
+        bundle.putInt("startTime", selectedLec.getStartTime());
+        bundle.putBoolean("isDouble", selectedLec.isDoubleLecture());
+        bundle.putString("facultyName", selectedLec.getFaculty().getName());
+        bundle.putString("subjectName", selectedLec.getSubject().getName());
+        newFragment.setArguments(bundle);
+
+        newFragment.show(getFragmentManager(), "LectureDetails");
+
+//        Toast.makeText(this, "Clicked " + event.getName(), Toast.LENGTH_SHORT).show();
     }
 
+    /*
+    * Delete the lecture when the slot is long pressed
+    * */
     @Override
     public void onEventLongPress(final WeekViewEvent event, RectF eventRect) {
         int i;
@@ -207,8 +242,8 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
                 )) {
                 break;
             }
-
         }
+
         Log.d("testing delete", Integer.toString(i));
         final Lecture selectedLec = lectures.get(i);
         Log.d("Selected Lec", selectedLec.toString());
@@ -236,9 +271,9 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
             }
         });
 
-
         Toast.makeText(this, "Long pressed event: " + event.getName(), Toast.LENGTH_SHORT).show();
     }
+
 
     @Override
     public void onEmptyViewLongPress(Calendar time) {

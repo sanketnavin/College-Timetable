@@ -24,6 +24,9 @@
         <activity
             android:name=".AddLectureActivity"
             android:label="Add Lecture"></activity>
+        <activity
+            android:name=".ModifyLectureActivity"
+            android:label="Modify Lecture"></activity>
     </application>
 
 </manifest>

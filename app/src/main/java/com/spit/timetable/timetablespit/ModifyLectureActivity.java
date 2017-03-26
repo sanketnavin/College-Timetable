@@ -1,13 +1,12 @@
 package com.spit.timetable.timetablespit;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -27,7 +26,11 @@ import java.util.List;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
-public class AddLectureActivity extends AppCompatActivity {
+/**
+ * Created by sanket.navin on 23-03-2017.
+ */
+
+public class ModifyLectureActivity extends AppCompatActivity{
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference lectureDatabaseReference;
@@ -70,7 +73,7 @@ public class AddLectureActivity extends AppCompatActivity {
                 subArray.add(subject);
                 Log.v("Sample", subject.getCode().toString());
                 subSpinnerArray.add(subject.getCode().toString());
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddLectureActivity.this, android.R.layout.simple_spinner_item, subSpinnerArray);
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(ModifyLectureActivity.this, android.R.layout.simple_spinner_item, subSpinnerArray);
 
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 subjects.setAdapter(adapter);
@@ -83,7 +86,6 @@ public class AddLectureActivity extends AppCompatActivity {
         };
 
 
-
         facchildEventListener= new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -92,7 +94,7 @@ public class AddLectureActivity extends AppCompatActivity {
                 facArray.add(faculty);
                 Log.v("Sample", faculty.getCode().toString());
                 facSpinnerArray.add(faculty.getCode().toString());
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddLectureActivity.this, android.R.layout.simple_spinner_item, facSpinnerArray);
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(ModifyLectureActivity.this, android.R.layout.simple_spinner_item, facSpinnerArray);
 
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 faculties.setAdapter(adapter);
@@ -123,22 +125,45 @@ public class AddLectureActivity extends AppCompatActivity {
                     if(facArray.get(i).getCode() == selected_fac)
                         f = facArray.get(i);
 
-                String value = ((RadioButton)findViewById(rg.getCheckedRadioButtonId() )).getText().toString();
-                Boolean doubleLec = Boolean.FALSE;
-                if(value.equals("Double Lecture"))
-                    doubleLec = Boolean.TRUE;
-
-                Calendar time = (Calendar) bundle.get("slotTime");
-                Log.d("My Time", time.toString());
-                int hour = time.get(Calendar.HOUR_OF_DAY);
-                int day = time.get(Calendar.DAY_OF_WEEK);
+                Bundle bundle = getIntent().getExtras();
+                final Bundle b = bundle.getBundle("lecBundle");
+                final int hour = b.getInt("startTime");
+                Log.d("Start Time", Integer.toString(hour));
+                final int day = b.getInt("day");
+                Log.d("My Day", Integer.toString(day));
+                boolean doubleLec = b.getBoolean("isDouble");
 
                 Lecture lec = new Lecture(s, f, day, hour, doubleLec);
+
+                final Faculty finalF = f;
+                final Subject finalS = s;
+                lectureDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot tasksSnapshot) {
+                        for (DataSnapshot snapshot: tasksSnapshot.getChildren()) {
+                            Lecture lecture = snapshot.getValue(Lecture.class);
+                            if(lecture.getSubject().getName().equals(b.getString("subjectName")) &&
+                                    lecture.getFaculty().getName().equals(b.getString("facultyName")) &&
+                                    (lecture.getDay() == day) &&
+                                    (lecture.getStartTime() == hour)
+                                    ){
+                                snapshot.getRef().removeValue();
+                            }
+                        }
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError firebaseError) {
+                        System.out.println("The read failed: " + firebaseError.getMessage());
+                    }
+                });
+
                 lectureDatabaseReference.push().setValue(lec);
 
-                Toast.makeText(AddLectureActivity.this, "Faculty " + s.getCode() + " was added.", LENGTH_SHORT).show();
-                Intent intent = new Intent(AddLectureActivity.this, BaseActivity.class);
+                Intent intent = new Intent(ModifyLectureActivity.this, BaseActivity.class);
                 startActivity(intent);
+
+//                Toast.makeText(AddLectureActivity.this, "Faculty " + s.getCode() + " was added.", LENGTH_SHORT).show();
+
             }
         });
 
@@ -150,4 +175,6 @@ public class AddLectureActivity extends AppCompatActivity {
         facultyDatabaseReference.removeEventListener(facchildEventListener);
         super.onPause();
     }
+
+
 }

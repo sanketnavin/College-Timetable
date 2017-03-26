@@ -43,6 +43,6 @@
         android:id="@+id/faculty_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ADD SUBJECT"/>
+        android:text="ADD FACULTY"/>
 
 </LinearLayout>

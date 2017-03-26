@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,7 @@ public class DetailsDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        Bundle bundle = getArguments();
+        final Bundle bundle = getArguments();
 
         View view = inflater.inflate(R.layout.fragment_dialog, null);
 
@@ -48,7 +49,9 @@ public class DetailsDialogFragment extends DialogFragment {
                 .setPositiveButton("Modify", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-
+                        Intent intent = new Intent(getActivity(), ModifyLectureActivity.class);
+                        intent.putExtra("lecBundle", bundle);
+                        startActivity(intent);
                     }
                 })
 

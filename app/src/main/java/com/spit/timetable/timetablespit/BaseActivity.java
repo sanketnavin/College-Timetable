@@ -60,7 +60,7 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Lecture lecture = dataSnapshot.getValue(Lecture.class);
-                Log.d(currTimetable, lecture.getFaculty().getCode());
+                Log.d("Data was added", lecture.getFaculty().getCode());
                 if(lecture.getSubject().getmClass().getCode().equals(currTimetable)) {
                     lectures.add(lecture);
                     Log.d(currTimetable, lecture.getFaculty().getCode());
@@ -68,8 +68,19 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
                 }
             }
 
-            @Override public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
-            @Override public void onChildRemoved(DataSnapshot dataSnapshot) { }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.d("Data has changed", s);
+            }
+            @Override public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Lecture lecture = dataSnapshot.getValue(Lecture.class);
+                Log.d("Removed", lectures.toString());
+                lectures.remove(lecture);
+                Log.d("Removed", lecture.toString());
+                Log.d("Removed", lectures.toString());
+                mWeekView.notifyDatasetChanged();
+                Log.d("Removed", "Data was removed");
+            }
             @Override public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
             @Override public void onCancelled(DatabaseError databaseError) { }
         };
@@ -218,6 +229,7 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
         Log.d("Room title", selectedLec.getSubject().getmClass().getRoom());
         bundle.putInt("startTime", selectedLec.getStartTime());
         bundle.putBoolean("isDouble", selectedLec.isDoubleLecture());
+        bundle.putInt("day", selectedLec.getDay());
         bundle.putString("facultyName", selectedLec.getFaculty().getName());
         bundle.putString("subjectName", selectedLec.getSubject().getName());
         newFragment.setArguments(bundle);
@@ -259,7 +271,7 @@ public class BaseActivity extends AppCompatActivity implements WeekView.EventCli
                     if(lecture.toString().equals(selectedLec.toString())){
                         Log.d("Value removed", lecture.toString());
                         lecSnapshot.getRef().removeValue();
-                        lectures.remove(selectedLec);
+                         lectures.remove(selectedLec);
                     }
                 }
                 mWeekView.notifyDatasetChanged();

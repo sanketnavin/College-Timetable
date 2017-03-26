@@ -1,6 +1,10 @@
 package com.spit.timetable.timetablespit;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by sanket.navin on 15-03-2017.
@@ -96,5 +100,18 @@ public class Lecture {
                 ", dayName='" + dayName + '\'' +
                 ", startTime=" + startTime +
                 '}';
+    }
+
+    @Exclude
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("subject", subject);
+        result.put("faculty", faculty);
+        result.put("day", day);
+        result.put("dayName", dayName);
+        result.put("startTime", startTime);
+        result.put("doubleLecture", doubleLecture);
+
+        return result;
     }
 }

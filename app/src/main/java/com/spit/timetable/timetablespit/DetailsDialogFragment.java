@@ -45,16 +45,20 @@ public class DetailsDialogFragment extends DialogFragment {
         else
             end_time.setText(Integer.toString(bundle.getInt("startTime")+1));
 
-        builder.setView(view)
-                .setPositiveButton("Modify", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent(getActivity(), ModifyLectureActivity.class);
-                        intent.putExtra("lecBundle", bundle);
-                        startActivity(intent);
-                    }
-                })
+        if(bundle.getBoolean("isFaculty")) {
 
+            builder.setView(view)
+                    .setPositiveButton("Modify", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent(getActivity(), ModifyLectureActivity.class);
+                            intent.putExtra("lecBundle", bundle);
+                            startActivity(intent);
+                        }
+                    });
+
+        }
+        builder.setView(view)
                 .setNegativeButton("Close", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {

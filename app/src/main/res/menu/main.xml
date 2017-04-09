@@ -7,6 +7,7 @@
         android:id="@+id/add_button"
         android:icon="@drawable/ic_add_black_48dp"
         android:title="Add Content"
+        android:visible="false"
         app:showAsAction="always"/>
 
     <item android:id="@+id/action_today"
